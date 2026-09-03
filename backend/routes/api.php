@@ -5,6 +5,10 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\DeploymentController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\BillingController;
+use App\Http\Controllers\Api\DomainController;
+use App\Http\Controllers\Api\DnsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,6 +48,41 @@ route::middleware('auth:sanctum')->group(function () {
 
     route::get('/projects/{project}/databases', [ProjectController::class, 'databases']);
     route::post('/projects/{project}/databases', [ProjectController::class, 'createDatabase']);
+});
+
+// Plans (readable by anyone authenticated; write only by admins)
+route::middleware('auth:sanctum')->group(function () {
+    route::get('/plans', [PlanController::class, 'index']);
+    route::get('/plans/{plan}', [PlanController::class, 'show']);
+
+    route::middleware('role:super_admin|admin')->group(function () {
+        route::post('/plans', [PlanController::class, 'store']);
+        route::patch('/plans/{plan}', [PlanController::class, 'update']);
+        route::delete('/plans/{plan}', [PlanController::class, 'destroy']);
+    });
+});
+
+// Billing / subscriptions (customer-scoped)
+route::middleware('auth:sanctum')->group(function () {
+    route::get('/billing/plans', [BillingController::class, 'plans']);
+    route::post('/billing/subscribe', [BillingController::class, 'subscribe']);
+    route::get('/billing/subscription', [BillingController::class, 'show']);
+    route::patch('/billing/subscription/plan', [BillingController::class, 'changePlan']);
+    route::post('/billing/subscription/renew', [BillingController::class, 'renew']);
+    route::get('/billing/invoices', [BillingController::class, 'invoices']);
+});
+
+// Customer domains + DNS (tenant-scoped: every lookup is filtered by customer_id)
+route::middleware('auth:sanctum')->group(function () {
+    route::get('/domains', [DomainController::class, 'index']);
+    route::post('/domains', [DomainController::class, 'store']);
+    route::delete('/domains/{domain}', [DomainController::class, 'destroy']);
+    route::post('/domains/{domain}/set-primary', [DomainController::class, 'setPrimary']);
+    route::post('/domains/{domain}/configure-managed', [DomainController::class, 'configureManaged']);
+
+    route::get('/domains/{domain}/dns-records', [DnsController::class, 'index']);
+    route::post('/domains/{domain}/dns-records', [DnsController::class, 'store']);
+    route::delete('/domains/{domain}/dns-records/{record}', [DnsController::class, 'destroy']);
 });
 
 // Admin

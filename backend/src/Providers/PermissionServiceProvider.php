@@ -45,6 +45,13 @@ class PermissionServiceProvider extends ServiceProvider
             'users.view',
             'users.manage',
             'audit.view',
+            // SaaS tenant (customer) capabilities
+            'domains.manage',
+            'dns.manage',
+            'mailboxes.manage',
+            'backups.manage',
+            'billing.view',
+            'billing.manage',
         ];
 
         foreach ($permissions as $perm) {
@@ -70,11 +77,13 @@ class PermissionServiceProvider extends ServiceProvider
         ])->get());
 
         $developer = Role::firstOrCreate(['slug' => 'developer'], [
-            'name' => 'Developer',
-            'description' => 'Create and manage own projects.',
+            'name' => 'Customer',
+            'description' => 'Create and manage own projects, domains, mail, backups and billing.',
         ]);
         $developer->syncPermissions(Permission::whereIn('slug', [
             'projects.create', 'projects.edit', 'projects.view',
+            'domains.manage', 'dns.manage', 'mailboxes.manage',
+            'backups.manage', 'billing.view', 'billing.manage',
         ])->get());
     }
 }

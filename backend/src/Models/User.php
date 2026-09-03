@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -22,6 +24,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'status',
+        'plan_id',
         'two_factor_secret',
         'two_factor_enabled',
     ];
@@ -38,6 +42,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_enabled' => 'boolean',
+            'status' => 'string',
         ];
     }
 
@@ -49,6 +54,41 @@ class User extends Authenticatable
     public function projects(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class, 'customer_id');
+    }
+
+    public function domains(): HasMany
+    {
+        return $this->hasMany(CustomerDomain::class, 'customer_id');
+    }
+
+    public function primaryDomain(): HasOne
+    {
+        return $this->hasOne(CustomerDomain::class, 'customer_id')
+            ->where('primary')
+            ->latestOfMany();
+    }
+
+    /**
+     * The customer's current active subscription (if any).
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class, 'customer_id')
+            ->where('status', 'active')
+            ->latestOfMany();
+    }
+
+    /**
+     * The plan the customer is currently on, if any.
+     */
+    public function currentPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
     }
 
     public function isSuperAdmin(): bool

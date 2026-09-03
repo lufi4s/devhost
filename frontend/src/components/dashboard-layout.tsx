@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Server, Settings, LogOut, FolderGit2, Shield } from 'lucide-react';
+import { LayoutDashboard, Server, Settings, LogOut, FolderGit2, Shield, CreditCard, Globe } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/projects', label: 'Projects', icon: FolderGit2 },
+  { href: '/domains', label: 'Domains', icon: Globe },
   { href: '/servers', label: 'Servers', icon: Server },
+  { href: '/billing', label: 'Billing', icon: CreditCard },
   { href: '/backups', label: 'Backups', icon: Server },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
@@ -101,7 +103,9 @@ function titleFor(pathname: string): string {
   const map: Record<string, string> = {
     '/dashboard': 'Dashboard',
     '/projects': 'Projects',
+    '/domains': 'Domains',
     '/servers': 'Servers',
+    '/billing': 'Billing',
     '/backups': 'Backups',
     '/settings': 'Settings',
     '/admin': 'Admin',

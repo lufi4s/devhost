@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
@@ -14,6 +15,7 @@ class Project extends Model
     protected $fillable = [
         'user_id',
         'server_id',
+        'subscription_id',
         'name',
         'slug',
         'type',
@@ -28,6 +30,7 @@ class Project extends Model
         'storage_limit',
         'memory_limit',
         'cpu_limit',
+        'plan_websites_used',
     ];
 
     protected $hidden = [];
@@ -37,6 +40,7 @@ class Project extends Model
         return [
             'storage_limit' => 'integer',
             'cpu_limit' => 'integer',
+            'plan_websites_used' => 'integer',
             'status' => 'string',
         ];
     }
@@ -56,6 +60,11 @@ class Project extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
     }
 
     public function server(): BelongsTo

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Services\AuditService;
+use App\Services\PlanService;
 use App\Services\ProvisioningService;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
@@ -13,8 +14,10 @@ use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
-    public function __construct(private ProjectService $projectService)
-    {
+    public function __construct(
+        private ProjectService $projectService,
+        private PlanService $planService,
+    ) {
     }
 
     /**
@@ -57,8 +60,18 @@ class ProjectController extends Controller
             ], 422);
         }
 
+        // Enforce plan limits before anything is created (server-side).
+        $subscription = Auth::user()->activeSubscription();
+        if ($subscription) {
+            $check = $this->planService->canCreateProject($subscription, $data['type'], $subscription->plan);
+            if (! $check['allowed']) {
+                return response()->json(['message' => $check['message']], 422);
+            }
+        }
+
         $project = Auth::user()->projects()->create([
             ...$data,
+            'subscription_id' => $subscription?->id,
             'status' => 'provisioning',
         ]);
 

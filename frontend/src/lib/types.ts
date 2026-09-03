@@ -113,6 +113,74 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface Plan {
+  id: number;
+  name: string;
+  slug: string;
+  currency: string;
+  price: number;
+  billing_cycle: string;
+  storage_limit: number;
+  memory_limit: number;
+  cpu_limit: number;
+  bandwidth_limit: number;
+  websites_limit: number;
+  databases_limit: number;
+  mailboxes_limit: number;
+  domains_limit: number;
+  email_storage: number;
+  node_enabled: boolean;
+  laravel_enabled: boolean;
+  wordpress_enabled: boolean;
+  php_enabled: boolean;
+  static_enabled: boolean;
+  backup_enabled: boolean;
+  sftp_enabled: boolean;
+  redis_enabled: boolean;
+  ssl_auto: boolean;
+  is_active: boolean;
+  sort_order: number;
+}
+
+export interface Subscription {
+  id: number;
+  customer_id: number;
+  plan_id: number;
+  status: string;
+  billing_cycle: string;
+  amount: number;
+  current_period_end: string | null;
+  plan?: Plan;
+}
+
+export interface Usage {
+  websites: { allowed: boolean; used: number; limit: number };
+  databases: { allowed: boolean; used: number; limit: number };
+  mailboxes: { allowed: boolean; used: number; limit: number };
+}
+
+export interface CustomerDomain {
+  id: number;
+  name: string;
+  verified: boolean;
+  primary: boolean;
+  nameserver_managed: boolean;
+  nameserver_1?: string | null;
+  nameserver_2?: string | null;
+  ssl_status: string;
+  dns_records?: DnsRecord[];
+  created_at: string;
+}
+
+export interface DnsRecord {
+  id: number;
+  name: string;
+  type: string;
+  value: string;
+  ttl: number;
+  priority?: number | null;
+}
+
 export interface CreateProjectPayload {
   name: string;
   subdomain: string;
