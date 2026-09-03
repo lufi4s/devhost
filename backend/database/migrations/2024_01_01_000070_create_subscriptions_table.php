@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained('plans')->restrictOnDelete();
             $table->string('status')->default('active'); // active | suspended | past_due | expired | canceled | trialing
             $table->string('billing_cycle')->default('monthly');
-            $table->unsignedDecimal('amount', 10, 2)->default(0);
+            $table->decimal('amount', 10, 2)->default(0);
             $table->timestamp('trial_ends_at')->nullable();
             $table->timestamp('current_period_start')->nullable();
             $table->timestamp('current_period_end')->nullable();

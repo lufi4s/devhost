@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subscription_id')->constrained('subscriptions')->cascadeOnDelete();
             $table->string('invoice_number')->unique();
-            $table->unsignedDecimal('amount', 10, 2)->default(0);
+            $table->decimal('amount', 10, 2)->default(0);
             $table->string('currency')->default('USD');
             $table->string('status')->default('pending'); // pending | paid | overdue | failed | void
             $table->string('payment_provider')->nullable(); // paystack | stripe | custom | invoice
