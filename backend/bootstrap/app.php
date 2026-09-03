@@ -16,12 +16,13 @@ $app = Application::configure(basePath: dirname(__DIR__))
             // API uses Sanctum bearer tokens; web sessions are CSRF-protected.
         ]);
 
-        // Spatie permission middleware aliases (Laravel 11 slim bootstrap does
-        // not register these automatically for us).
+        // Alias role/permission gateways to the role-slug check. The app stores
+        // roles via users.role_id -> roles.slug, so Spatie's pivot-based
+        // middleware is replaced by App\Http\Middleware\CheckRole.
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
+            'permission' => \App\Http\Middleware\CheckRole::class,
+            'role_or_permission' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
