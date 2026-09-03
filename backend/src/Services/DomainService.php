@@ -61,8 +61,10 @@ class DomainService
             return ['ok' => false, 'message' => "You already added {$name}."];
         }
 
-        // Enforce the plan domain limit.
-        $subscription = $customer->activeSubscription();
+        // Enforce the plan domain limit. `activeSubscription` (no parens)
+        // resolves the relation to the actual Subscription model; the bare
+        // relation object would fail the `checkDomains(Subscription)` type hint.
+        $subscription = $customer->activeSubscription;
         if ($subscription && ! $this->planService->checkDomains($subscription)['allowed']) {
             $check = $this->planService->checkDomains($subscription);
             return [
