@@ -4,10 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->withPaths([
-        'app' => __DIR__.'/../src',
-    ])
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -21,4 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();
+
+// Application code lives in src/ (composer autoload maps App\ => src/), but
+// Laravel defaults path() to <base>/app. Point the app path at src/ so the
+// application namespace resolves and getNamespace() succeeds.
+$app->useAppPath(__DIR__.'/../src');
+
+return $app;
