@@ -1,0 +1,34 @@
+# Env
+.env
+backend/.env
+frontend/.env
+frontend/.env.local
+agent/.env
+
+# Dependencies
+node_modules/
+backend/vendor/
+frontend/.next/
+frontend/out/
+agent/node_modules/
+
+# Logs
+*.log
+backend/storage/logs/*.log
+frontend/next.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Docker
+docker/tmp/
+docker/backup/
+
+# Debug / deployment noise (scripts, logs, build artifacts)
+scripts/
+*.txt
+*.tar
+*.out.txt

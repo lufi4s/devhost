@@ -1,0 +1,136 @@
+# Developer Hosting Platform — Phase 1 development environment.
+#
+# Services:
+#   frontend  Next.js (App Router)
+#   backend   Laravel API (PHP-FPM + Composer)
+#   worker    Laravel queue worker (provisioning jobs)
+#   db        PostgreSQL
+#   redis     Redis (queue + cache)
+#   nginx     Reverse proxy → routes /api to backend, everything else to frontend
+#
+# The Node Agent (Phase 9) is intentionally NOT included here.
+
+name: developer-hosting-platform
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-devhost}
+      POSTGRES_USER: ${DB_USERNAME:-devhost}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-devhost_password}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-devhost}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devhost
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devhost
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_NAME: ${APP_NAME:-Developer Hosting Platform}
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_KEY: ${APP_KEY:?APP_KEY must be set in .env}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-devhost}
+      DB_USERNAME: ${DB_USERNAME:-devhost}
+      DB_PASSWORD: ${DB_PASSWORD:-devhost_password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
+      SANCTUM_SERVICE_DOMAIN: ${SANCTUM_SERVICE_DOMAIN:-localhost}
+      AGENT_API_KEY: ${AGENT_API_KEY:-dev-agent-key}
+      AGENT_URL: ${AGENT_URL:-http://agent:8787}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - devhost
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: php artisan queue:work redis --sleep=3 --tries=16 --timeout=90
+    environment:
+      APP_NAME: ${APP_NAME:-Developer Hosting Platform}
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_KEY: ${APP_KEY:?APP_KEY must be set in .env}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-devhost}
+      DB_USERNAME: ${DB_USERNAME:-devhost}
+      DB_PASSWORD: ${DB_PASSWORD:-devhost_password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
+      AGENT_API_KEY: ${AGENT_API_KEY:-dev-agent-key}
+      AGENT_URL: ${AGENT_URL:-http://agent:8787}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - devhost
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${API_URL:-}
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-}
+    depends_on:
+      - backend
+    networks:
+      - devhost
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./infrastructure/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - devhost
+
+volumes:
+  db-data:
+
+networks:
+  devhost:
+    driver: bridge
