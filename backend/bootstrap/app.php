@@ -15,6 +15,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             // API uses Sanctum bearer tokens; web sessions are CSRF-protected.
         ]);
+
+        // Spatie permission middleware aliases (Laravel 11 slim bootstrap does
+        // not register these automatically for us).
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

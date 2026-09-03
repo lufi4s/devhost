@@ -87,11 +87,11 @@ route::middleware('auth:sanctum')->group(function () {
 
 // Admin
 route::middleware(['auth:sanctum', 'role:super_admin|admin'])->group(function () {
-    route::get('/audit-logs', [AuditLogController::class, 'index']);
-    route::get('/users', [AdminController::class, 'users']);
-    route::post('/users', [AdminController::class, 'store']);
-    route::patch('/users/{user}', [AdminController::class, 'update']);
-    route::delete('/users/{user}', [AdminController::class, 'destroy']);
-    route::get('/projects', [AdminController::class, 'projects']);
-    route::get('/servers', [AdminController::class, 'servers']);
+    route::get('/admin/audit-logs', [AuditLogController::class, 'index']);
+    route::get('/admin/users', [AdminController::class, 'users']);
+    route::post('/admin/users', [AdminController::class, 'store']);
+    route::patch('/admin/users/{user}', [AdminController::class, 'update']);
+    route::delete('/admin/users/{user}', [AdminController::class, 'destroy']);
+    route::get('/admin/projects', [AdminController::class, 'projects']);
+    route::get('/admin/servers', [AdminController::class, 'servers']);
 });
