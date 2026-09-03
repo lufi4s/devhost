@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('currency')->default('USD');
-            $table->unsignedDecimal('price', 10, 2)->default(0);
+            $table->decimal('price', 10, 2)->default(0);
             $table->string('billing_cycle')->default('monthly'); // monthly | quarterly | annually
             $table->unsignedBigInteger('storage_limit')->default(0); // MB
             $table->unsignedBigInteger('memory_limit')->default(0); // MB
