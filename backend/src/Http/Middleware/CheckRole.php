@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -24,6 +25,13 @@ class CheckRole
         }
 
         $slug = $user->role?->slug;
+        Log::info('CheckRole', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'role_id' => $user->role_id,
+            'slug' => $slug,
+            'allowed' => $roles,
+        ]);
 
         if (! $slug || ! in_array($slug, $roles, true)) {
             return response()->json(['message' => 'Forbidden.'], 403);
