@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -25,15 +24,19 @@ class CheckRole
         }
 
         $slug = $user->role?->slug;
-        Log::info('CheckRole', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'role_id' => $user->role_id,
-            'slug' => $slug,
-            'allowed' => $roles,
-        ]);
 
-        if (! $slug || ! in_array($slug, $roles, true)) {
+        // Laravel may or may not split the middleware parameters on '|'; normalize
+        // so "super_admin|admin" resolves to ['super_admin', 'admin'] either way.
+        $allowed = [];
+        foreach ($roles as $role) {
+            foreach (explode('|', $role) as $single) {
+                if ($single !== '') {
+                    $allowed[] = $single;
+                }
+            }
+        }
+
+        if (! $slug || ! in_array($slug, $allowed, true)) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
